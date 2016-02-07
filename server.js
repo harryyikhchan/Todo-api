@@ -13,9 +13,17 @@ var todoNextId = 1;
 
 app.use(bodyParser.json());
 
-// GET /todos
+// GET /todos?completed=true
 app.get('/todos', function (req, res) {
-	res.json(todos);
+	var queryParams = req.query;
+	var filteredTodos = todos;
+
+	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true')
+		filteredTodos = _.where(filteredTodos, {completed: true});
+	else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false')
+		filteredTodos = _.where(filteredTodos, {completed: false});
+
+	res.json(filteredTodos);
 });
 
 // GET /todos/:id
@@ -34,7 +42,6 @@ app.get('/todos/:id', function (req, res) {
 // POST /todos
 app.post('/todos', function (req, res) {
 	var body = _.pick(req.body, 'description' , 'completed'); 
-
 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0 ) {
 		return res.status(400).send();
 	}
@@ -62,6 +69,38 @@ app.delete('/todos/:id' , function (req, res) {
 	else
 		res.status(404).json({"error": "no todo found with that id"});
 	
+});
+
+// PUT /todos/:id
+app.put('/todos/:id', function (req, res) {
+	var UpdatedId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: UpdatedId});
+	var body = _.pick(req.body, 'description' , 'completed'); 
+	var validAttributes = {};
+
+
+	// Validate completed
+	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
+		validAttributes.completed = body.completed;
+	} else if (body.hasOwnProperty('completed')) {
+		return res.status(400).send();
+	} else {
+		return res.status(404).send();
+	}
+
+	// Validate description
+	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
+		validAttributes.description = body.description;
+	} else if (body.hasOwnProperty('description')) {
+		return res.status(400).send();
+	} else {
+		return res.status(404).send();
+	}
+
+	// Update the existing id
+	_.extend(matchedTodo, validAttributes);
+	res.json(matchedTodo);
+		
 });
 
 app.listen(PORT, function () {
