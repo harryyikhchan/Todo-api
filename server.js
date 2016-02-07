@@ -33,7 +33,7 @@ app.get('/todos/:id', function (req, res) {
 
 // POST /todos
 app.post('/todos', function (req, res) {
-	var body = _.pick(req.body, 'description' , 'completed'); // User _.pick to only pick description and completed
+	var body = _.pick(req.body, 'description' , 'completed'); 
 
 	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0 ) {
 		return res.status(400).send();
@@ -48,6 +48,20 @@ app.post('/todos', function (req, res) {
 	todos.push(body);
 
 	res.json(body);
+});
+
+// DELETE /todos/:id
+app.delete('/todos/:id' , function (req, res) {
+	var DeletedId = parseInt(req.params.id, 10);
+	var matchedTodo = _.findWhere(todos, {id: DeletedId});
+
+	if (matchedTodo) {
+		todos = _.without(todos, matchedTodo);
+		res.json(matchedTodo);
+	}
+	else
+		res.status(404).json({"error": "no todo found with that id"});
+	
 });
 
 app.listen(PORT, function () {
