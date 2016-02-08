@@ -13,7 +13,7 @@ var todoNextId = 1;
 
 app.use(bodyParser.json());
 
-// GET /todos?completed=true
+// GET /todos?completed=true&q=work
 app.get('/todos', function (req, res) {
 	var queryParams = req.query;
 	var filteredTodos = todos;
@@ -22,6 +22,12 @@ app.get('/todos', function (req, res) {
 		filteredTodos = _.where(filteredTodos, {completed: true});
 	else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false')
 		filteredTodos = _.where(filteredTodos, {completed: false});
+
+	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
+		filteredTodos = _.filter(filteredTodos, function (todo) {
+			return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+		});
+	}
 
 	res.json(filteredTodos);
 });
