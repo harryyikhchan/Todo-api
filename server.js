@@ -35,7 +35,7 @@ app.get('/todos', function(req, res) {
 		where: where
 	}).then(function(todos) {
 		res.json(todos);
-	}, function(e){
+	}, function(e) {
 		res.status(500).send();
 	});
 
