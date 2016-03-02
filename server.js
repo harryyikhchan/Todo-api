@@ -129,7 +129,7 @@ app.post('/users', function(req, res) {
 
 	// Create the user id
 	db.user.create(body).then(function(user) {
-		res.json(user);
+		res.json(user.toPublicJSON());
 	}, function(e) {
 		res.status(400).json(e);
 	});
